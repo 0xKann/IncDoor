@@ -35,6 +35,7 @@ interface IIncDoorFactory is IAccessControl {
 
     function deployCampaign(
        uint32 holdingPeriodInSeconds,
+       uint256 fundraisingAmount,
         address targetToken,
         address campaignAdmin,
         address donationReceiver,
@@ -44,6 +45,7 @@ interface IIncDoorFactory is IAccessControl {
 
     function deployAndFundCampaign(
         uint32 holdingPeriodInSeconds,
+        uint256 fundraisingAmount,
         address targetToken,
         address campaignAdmin,
         uint256 startTimestamp,
@@ -54,6 +56,7 @@ interface IIncDoorFactory is IAccessControl {
 
     function getCampaignAddress(
         uint32 holdingPeriodInSeconds,
+        uint256 fundraisingAmount,
         address targetToken,
         address campaignAdmin,
         address donationReceiver,

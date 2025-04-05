@@ -21,6 +21,7 @@ contract IncDoor is IIncCampaign, AccessControl {
 
     // Campaign Configuration
     uint32 public immutable holdingPeriodInSeconds;
+    uint256 public immutable targetAmount;
     address public immutable targetToken;
     address public immutable donationReceiver;
     uint256 public immutable startTimestamp;
@@ -59,6 +60,7 @@ contract IncDoor is IIncCampaign, AccessControl {
     /// @param campaignId_ Unique identifier for this campaign
     constructor(
         uint32 holdingPeriodInSeconds_,
+        uint256 fundraisingAmount,
         address targetToken_,
         address campaignAdmin,
         uint256 startTimestamp_,
@@ -91,6 +93,7 @@ contract IncDoor is IIncCampaign, AccessControl {
         // Initialize as not manually deactivated
         _manuallyDeactivated = false;
         holdingPeriodInSeconds = holdingPeriodInSeconds_;
+        targetAmount = fundraisingAmount;
         feeBps = feeBps_;
         donationReceiver = donationReceiver;
     }
@@ -144,17 +147,18 @@ contract IncDoor is IIncCampaign, AccessControl {
         if (campaignId_ != campaignId) {
             revert InvalidCampaignId();
         }
-
+        uint256 balanceBefore = getBalanceOfSelf(targetToken);
+        if(balanceBefore > targetAmount) revert CampaignRaisedFundGoal();
         uint256 amountReceived;
-        if (toToken == NATIVE_TOKEN) {
+        if (targetToken == NATIVE_TOKEN) {
             amountReceived = msg.value;
         } else {
             if (msg.value > 0) {
                 revert InvalidToTokenReceived(NATIVE_TOKEN);
             }
-            IERC20 tokenReceived = IERC20(toToken);
+            IERC20 tokenReceived = IERC20(targetToken);
             uint256 balanceOfSender = tokenReceived.balanceOf(msg.sender);
-            uint256 balanceBefore = getBalanceOfSelf(toToken);
+            uint256 balanceBefore = getBalanceOfSelf(targetToken);
 
             SafeERC20.safeTransferFrom(tokenReceived, msg.sender, address(this), balanceOfSender);
 
@@ -177,16 +181,22 @@ contract IncDoor is IIncCampaign, AccessControl {
         emit NewParticipation(campaignId_, userAddress, pID, amountReceived, userRewards, fees, data);
     }
 
+    function enoughFundsRaised() internal view returns (bool) {
+        uint256 balance = getBalanceOfSelf(targetToken);
+    return balance >= targetAmount;
+}
+
     /// @notice Callable by everyone, only when holdingPeriodInSeconds is reached and campaign is not more active.
     /// @notice Sends the donation amount to donationReceiver.
     function reallocateTokens() public {
         if (block.timestamp < startTimestamp_ + holdingPeriodInSeconds_) revert CampaignIsStillActive();
+
         
-         if (toToken == NATIVE_TOKEN) {
+         if (targetToken == NATIVE_TOKEN) {
             (bool success, ) = donationReceiver.call{value: totalReallocatedAmount}("");
             require(success, "Native token transfer failed");
         } else {
-             IERC20 token = IERC20(toToken);
+             IERC20 token = IERC20(targetToken);
             SafeERC20.safeTransfer(token, donationReceiver, totalReallocatedAmount);
         }
 

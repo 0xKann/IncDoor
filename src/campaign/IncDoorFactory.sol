@@ -44,6 +44,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
     /// @dev Uses Create2 for unique address generation
     function deployCampaign(
         uint32 holdingPeriodInSeconds,
+        uint256 fundraisingAmount,
         address targetToken,
         address campaignAdmin,
         address donationReceiver,
@@ -58,6 +59,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
         bytes32 salt = keccak256(
             abi.encode(
                 holdingPeriodInSeconds,
+                fundraisingAmount,
                 targetToken,
                 campaignAdmin,
                 donationReceiver,
@@ -70,6 +72,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
         // Create constructor arguments
         bytes memory constructorArgs = abi.encode(
             holdingPeriodInSeconds,
+            fundraisingAmount,
             targetToken,
             campaignAdmin,
             startTimestamp,
@@ -92,6 +95,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
     /// @notice Deploys a new donation campaign and funds it
     function deployAndFundCampaign(
         uint32 holdingPeriodInSeconds,
+        uint256 fundraisingAmount,
         address targetToken,
         address campaignAdmin,
         uint256 startTimestamp,
@@ -110,6 +114,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
             // Deploy contract first
             campaign = deployCampaign(
                 holdingPeriodInSeconds,
+                fundraisingAmount,
                 targetToken,
                 campaignAdmin,
                 startTimestamp,
@@ -124,6 +129,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
 
             campaign = deployCampaign(
                holdingPeriodInSeconds,
+               fundraisingAmount,
                 targetToken,
                 campaignAdmin,
                 startTimestamp,
@@ -137,6 +143,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
    
     function getCampaignAddress(
         uint32 holdingPeriodInSeconds,
+        uint256 fundraisingAmount,
         address targetToken,
         address campaignAdmin,
         address donationReceiver,
@@ -146,6 +153,7 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
         bytes32 salt = keccak256(
             abi.encode(
                 holdingPeriodInSeconds,
+                fundraisingAmount,
                 targetToken,
                 campaignAdmin,
                 donationReceiver,
@@ -157,11 +165,12 @@ contract IncDoorFactory is IIncDoorFactory, AccessControl {
 
         bytes memory constructorArgs = abi.encode(
            holdingPeriodInSeconds,
-                targetToken,
-                campaignAdmin,
-                donationReceiver,
-                startTimestamp,
-                uuid
+           fundraisingAmount,
+            targetToken,
+            campaignAdmin,
+            donationReceiver,
+            startTimestamp,
+            uuid
         );
 
         bytes memory bytecode = abi.encodePacked(type(IncDoorCampaign).creationCode, constructorArgs);

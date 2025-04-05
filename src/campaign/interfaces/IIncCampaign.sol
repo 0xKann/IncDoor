@@ -5,12 +5,10 @@ import "./IBaseIncDoor.sol";
 
 interface IIncCampaign is IBaseIncDoor {
     // Errors
-    error NotEnoughRewardsAvailable();
     error InactiveCampaign();
     error StartDateNotReached();
     error InvalidCampaignSettings();
     error EmptyClaimArray();
-    error HoldingPeriodNotElapsed(uint256 pID);
     error UnauthorizedCaller(uint256 pID);
     error InvalidParticipationStatus(uint256 pID);
     error NativeTokenTransferFailed();
@@ -18,6 +16,7 @@ interface IIncCampaign is IBaseIncDoor {
     error InvalidCampaignId();
     error CannotRescueRewardToken();
     error CampaignIsStillActive();
+    error CampaignRaisedFundGoal();
 
     // Events
     event FeesCollected(uint256 amount);
